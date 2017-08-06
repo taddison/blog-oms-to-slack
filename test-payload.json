@@ -1,0 +1,57 @@
+{
+  "incidentname": "Test",
+  "IncludeSearchResults": true,
+  "SearchResults": {
+    "id": "subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/oi-default-east-us/providers/Microsoft.OperationalInsights/workspaces/...|2017-08-0607-46-30Z",
+    "__metadata": {
+      "top": 2147483647,
+      "RequestId": "4a37b79a-a875-40ad-9cbc-9d3dfcfa4df7|2017-08-0607-46-30Z",
+      "Status": "Successful",
+      "NumberOfDocuments": 0,
+      "StartTime": "2017-08-06T07:46:30.0883329Z",
+      "LastUpdated": "2017-08-06T07:46:30.1508349Z",
+      "ETag": "636376023901508349",
+      "aggregateIntervalField": "TimeGenerated",
+      "aggregateIntervalSeconds": 60.0,
+      "resultType": "aggregated",
+      "aggregatedValueField": "AggregatedValue",
+      "aggregatedValueFields": [
+        "AggregatedValue"
+      ],
+      "aggregateGroupingFields": [
+        "Computer"
+      ],
+      "sum": 1357.9268578511974,
+      "max": 82.791292826334612,
+      "total": 95,
+      "requestTime": 240
+    },
+    "value": [
+      {
+        "TimeGenerated": "2017-08-06T07:46:27Z",
+        "Computer": "Server1",
+        "AggregatedValue": 50.585148620605466
+      },
+      {
+        "TimeGenerated": "2017-08-06T07:45:27Z",
+        "Computer": "Server1",
+        "AggregatedValue": 51.3542226155599
+      },
+      {
+        "TimeGenerated": "2017-08-06T07:44:27Z",
+        "Computer": "Server1",
+        "AggregatedValue": 57.064053853352874
+      },
+      {
+        "TimeGenerated": "2017-08-06T07:43:27Z",
+        "Computer": "Server1",
+        "AggregatedValue": 82.791292826334612
+      },
+      {
+        "TimeGenerated": "2017-08-06T07:42:27Z",
+        "Computer": "Server1",
+        "AggregatedValue": 27.168399810790998
+      }
+    ]
+  }
+}
