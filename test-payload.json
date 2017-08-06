@@ -1,5 +1,6 @@
 {
-  "incidentname": "Test",
+  "WarningThreshold": 60,
+  "CriticalThreshold": 90,
   "IncludeSearchResults": true,
   "SearchResults": {
     "id": "subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/oi-default-east-us/providers/Microsoft.OperationalInsights/workspaces/...|2017-08-0607-46-30Z",
