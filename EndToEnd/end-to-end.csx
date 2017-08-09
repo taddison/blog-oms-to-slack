@@ -17,11 +17,11 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
     var warningThreshold = data?.WarningThreshold ?? 75;
     var criticalThreshold = data?.CriticalThreshold ?? 90;
 
-    var aggregatedResults = data.SearchResults.value.GroupBy(v => v.Computer)
+    var aggregatedResults = data.SearchResults.Tables[0].Rows.GroupBy(r => r[1].ToString())
                             .Select(g => new {  Computer = g.Key
-                                                ,Average = g.Average(v => v.AggregatedValue)
-                                                ,Warning = g.Count(v => v.AggregatedValue >= warningThreshold)
-                                                ,Critical = g.Count(v => v.AggregatedValue >= criticalThreshold) });
+                                                ,Average = g.Average(r => Double.Parse(r[2].ToString()))
+                                                ,Warning = g.Count(r =>  Double.Parse(r[2].ToString()) >= warningThreshold)
+                                                ,Critical = g.Count(r =>  Double.Parse(r[2].ToString()) >= criticalThreshold) });
 
     var message = string.Empty;
     var critical = false;
@@ -56,45 +56,28 @@ public class SlackMessage
     public bool link_names { get; set ; }
 }
 
-public class Metadata
+public class Column
 {
-    public long top { get; set; }
-    public string RequestId { get; set; }
-    public string Status { get; set; }
-    public int NumberOfDocuments { get; set; }
-    public string StartTime { get; set; }
-    public string LastUpdated { get; set; }
-    public string ETag { get; set; }
-    public string aggregateIntervalField { get; set; }
-    public double aggregateIntervalSeconds { get; set; }
-    public string resultType { get; set; }
-    public string aggregatedValueField { get; set; }
-    public List<string> aggregatedValueFields { get; set; }
-    public List<string> aggregateGroupingFields { get; set; }
-    public double sum { get; set; }
-    public double max { get; set; }
-    public int total { get; set; }
-    public int requestTime { get; set; }
+    public string ColumnName { get; set; }
+    public string DataType { get; set; }
+    public string ColumnType { get; set; }
 }
 
-public class Value
+public class Table
 {
-    public string TimeGenerated { get; set; }
-    public string Computer { get; set; }
-    public double AggregatedValue { get; set; }
+    public string TableName { get; set; }
+    public List<Column> Columns { get; set; }
+    public List<List<object>> Rows { get; set; }
 }
 
 public class SearchResults
 {
-    public string id { get; set; }
-    public Metadata __metadata { get; set; }
-    public List<Value> value { get; set; }
+    public List<Table> Tables { get; set; }
 }
 
 public class OMSPayload
 {
-    public bool IncludeSearchResults { get; set; }
+    public int WarningThreshold { get; set; }
+    public int CriticalThreshold { get; set; }
     public SearchResults SearchResults { get; set; }
-    public int? WarningThreshold { get; set; }
-    public int? CriticalThreshold { get; set; }
 }
