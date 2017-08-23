@@ -52,45 +52,11 @@ public class DriveToSlack
 
         using (var client = new HttpClient())
         {
-            var slackPayload = new SlackMessage() { text = message, channel = slackChannel, username = slackUsername, link_names = true };
+            var slackPayload = new SlackMessage() { Text = message, Channel = slackChannel, Username = slackUsername, LinkNames = true };
             var hook = new StringContent(JsonConvert.SerializeObject(slackPayload), Encoding.UTF8, "application/json");
             var resp = await client.PostAsync(slackUri, hook);
         }
 
         return req.CreateResponse(HttpStatusCode.OK);
-    }
-
-    public class SlackMessage
-    {
-        public string text { get; set; }
-        public string channel { get; set; }
-        public string username { get; set; }
-        public bool link_names { get; set; }
-    }
-
-    public class Column
-    {
-        public string ColumnName { get; set; }
-        public string DataType { get; set; }
-        public string ColumnType { get; set; }
-    }
-
-    public class Table
-    {
-        public string TableName { get; set; }
-        public List<Column> Columns { get; set; }
-        public List<List<object>> Rows { get; set; }
-    }
-
-    public class SearchResults
-    {
-        public List<Table> Tables { get; set; }
-    }
-
-    public class OMSPayload
-    {
-        public int WarningThreshold { get; set; }
-        public int CriticalThreshold { get; set; }
-        public SearchResults SearchResults { get; set; }
     }
 }
