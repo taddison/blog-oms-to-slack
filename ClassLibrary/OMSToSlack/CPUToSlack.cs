@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Azure.WebJobs;
 
 public class CPUToSlack
 {
-    public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
+    [FunctionName("CPUToSlack")]
+    public static async Task<object> Run([HttpTrigger(WebHookType = "genericJson")]HttpRequestMessage req, TraceWriter log)
     {
         var slackUri = "https://requestb.in/1hoo74a1";
         var slackChannel = "#oms-alerts";
