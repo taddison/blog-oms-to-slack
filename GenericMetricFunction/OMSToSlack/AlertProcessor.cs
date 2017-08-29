@@ -16,7 +16,7 @@ namespace OMSToSlack
             var comparison = alert.LessThanThresholdIsBad ? LessThan : MoreThan;
 
             // Machine-specific overrides?
-            var (critical, warning) = GetMachineDefaultThresholdOverrides(alert.MachineName);
+            var (critical, warning) = GetMachineDefaultThresholdOverrides(alert.MachineName, alert.MetricName);
             var criticalThreshold = critical ?? alert.DefaultCriticalThreshold;
             var warningThreshold = warning ?? alert.DefaultWarningThreshold;
 
@@ -52,6 +52,7 @@ namespace OMSToSlack
             var message = $"{alert.DefaultAlertMessage} [{(isCritical ? "CRIT" : "WARN")}] :: {alert.MachineName}{instance} :: ";
             message += $"{totals.Min.ToString(alert.FormatString)}/{totals.Average.ToString(alert.FormatString)}/{totals.Max.ToString(alert.FormatString)} ";
             message += $"(min/avg/max {alert.MetricName})";
+            
             if(isCritical)
             {
                 message += " @channel";
@@ -64,11 +65,13 @@ namespace OMSToSlack
             }
         }
 
-        private static (double? warningThreshold, double? criticalThreshold) GetMachineDefaultThresholdOverrides(string machineName)
+        private static (double? warningThreshold, double? criticalThreshold) GetMachineDefaultThresholdOverrides(string machineName, string metricName)
         {
-            switch(machineName)
+            var combined = $"{machineName}|{metricName}";
+
+            switch(combined)
             {
-                case "Server2":
+                case "Server2|Processor Usage %":
                     return (0.8, 0.9);
                 default:
                     return (null, null);
