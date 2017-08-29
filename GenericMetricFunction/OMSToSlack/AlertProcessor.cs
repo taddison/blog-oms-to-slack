@@ -16,7 +16,7 @@ namespace OMSToSlack
             var comparison = alert.LessThanThresholdIsBad ? LessThan : MoreThan;
 
             // Machine-specific overrides?
-            var (critical, warning) = GetMachineDefaultThresholdOverrides(alert.MachineName, alert.MetricName);
+            var (warning, critical) = GetMachineDefaultThresholdOverrides(alert.MachineName, alert.MetricName);
             var criticalThreshold = critical ?? alert.DefaultCriticalThreshold;
             var warningThreshold = warning ?? alert.DefaultWarningThreshold;
 
