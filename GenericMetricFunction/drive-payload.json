@@ -2,6 +2,7 @@
   "IncludeSearchResults": true,
   "WarningThreshold": 0.20,
   "CriticalThreshold": 0.10,
+  "ValueMultiplier": 0.01,
   "Channel": "#oms-alerts",
   "LessThanThresholdIsBad": true,
   "AlertMessage": "Infra - Drive Space",

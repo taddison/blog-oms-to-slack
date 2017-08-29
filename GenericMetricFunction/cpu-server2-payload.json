@@ -2,6 +2,7 @@
   "IncludeSearchResults": true,
   "WarningThreshold": 0.35,
   "CriticalThreshold": 0.45,
+  "ValueMultiplier": 0.01,
   "Channel": "#oms-alerts",
   "LessThanThresholdIsBad": false,
   "AlertMessage": "Infra - CPU",
