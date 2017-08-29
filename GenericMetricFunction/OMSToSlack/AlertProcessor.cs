@@ -52,6 +52,10 @@ namespace OMSToSlack
             var message = $"{alert.DefaultAlertMessage} [{(isCritical ? "CRIT" : "WARN")}] :: {alert.MachineName}{instance} :: ";
             message += $"{totals.Min.ToString(alert.FormatString)}/{totals.Average.ToString(alert.FormatString)}/{totals.Max.ToString(alert.FormatString)} ";
             message += $"(min/avg/max {alert.MetricName})";
+            if(isCritical)
+            {
+                message += " @channel";
+            }
                 
             // Send message
             foreach(var channel in channels)

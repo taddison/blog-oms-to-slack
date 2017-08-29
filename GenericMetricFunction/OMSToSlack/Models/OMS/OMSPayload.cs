@@ -4,6 +4,7 @@
     {
         public double WarningThreshold { get; set; }
         public double CriticalThreshold { get; set; }
+        public double ValueMultiplier { get; set; }
         public string Channel { get; set; }
         public bool LessThanThresholdIsBad { get; set; }
         public string AlertMessage { get; set; }

@@ -18,7 +18,7 @@ public class OMSMetricToSlack
 
         var metrics = data.SearchResults.Tables[0].Rows.Select(r =>
         {
-            return new MetricValue(DateTime.Parse(r[0].ToString()), Double.Parse(r[2].ToString()));
+            return new MetricValue(DateTime.Parse(r[0].ToString()), Double.Parse(r[2].ToString()) * data.ValueMultiplier);
         });
 
         // Server1|E:
