@@ -1,4 +1,6 @@
-﻿using OMSToSlack.Models;
+﻿using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Host;
+using OMSToSlack.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +12,9 @@ namespace OMSToSlack
         private static Func<double, double, bool> LessThan = (double value, double threshold) => { return value < threshold; };
         private static Func<double, double, bool> MoreThan = (double value, double threshold) => { return value > threshold; };
 
-        public static async void ProcessAlert(Alert alert)
+        public static async void ProcessAlert(Alert alert, ExecutionContext context)
         {
-            var alertConfig = ConfigHelper.GetAlertConfig(alert);
+            var alertConfig = ConfigHelper.GetAlertConfig(alert, context);
 
             // Is this a < or > alert?
             var comparison = alertConfig.LessThanThresholdIsBad ? LessThan : MoreThan;

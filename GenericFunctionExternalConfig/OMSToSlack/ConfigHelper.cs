@@ -1,6 +1,9 @@
 ﻿using CsvHelper;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Host;
 using OMSToSlack.Models;
 using OMSToSlack.Models.Configs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,11 +16,13 @@ namespace OMSToSlack
         private static List<OverrideAlertConfig> __overrideAlertConfigs;
         private static List<DefaultAlertNotificationConfig> __defaultAlertNotificationConfigs;
         private static List<OverrideAlertNotificationConfig> __overrideAlertNotificationConfigs;
+        private static ExecutionContext __context;
 
-        public static AlertConfig GetAlertConfig(Alert alert)
+        public static AlertConfig GetAlertConfig(Alert alert, ExecutionContext context)
         {
+            __context = context;
             var defaultConfig = GetDefaultAlertConfigs().Single(c => c.MetricName == alert.MetricName);
-
+            
             var overrideConfig = GetOverrideAlertConfigs().FirstOrDefault(c => c.MetricName == alert.MetricName && c.MachineName == alert.MachineName);
 
             return new AlertConfig(
@@ -100,7 +105,7 @@ namespace OMSToSlack
         {
             if(__defaultAlertConfigs == null)
             {
-                using (var tr = File.OpenText("./Configuration/defaultAlertConfig.csv"))
+                using (var tr = File.OpenText(__context.FunctionAppDirectory + "/Configuration/defaultAlertConfig.csv"))
                 {
                     // TODO: Unique on metricName
                     var csv = new CsvReader(tr);
@@ -117,7 +122,7 @@ namespace OMSToSlack
             if(__overrideAlertConfigs == null)
             {
                 // TODO: Unique on metric + machine names
-                using (var tr = File.OpenText("./Configuration/overrideAlertConfig.csv"))
+                using (var tr = File.OpenText(__context.FunctionAppDirectory + "/Configuration/overrideAlertConfig.csv"))
                 {
                     var csv = new CsvReader(tr);
                     var configs = csv.GetRecords<OverrideAlertConfig>();
@@ -132,7 +137,7 @@ namespace OMSToSlack
         {
             if( __defaultAlertNotificationConfigs is null)
             {
-                using (var tr = File.OpenText("./Configuration/defaultAlertNotificationConfig.csv"))
+                using (var tr = File.OpenText(__context.FunctionAppDirectory + "/Configuration/defaultAlertNotificationConfig.csv"))
                 {
                     var csv = new CsvReader(tr);
                     var configs = csv.GetRecords<DefaultAlertNotificationConfig>();
@@ -147,7 +152,7 @@ namespace OMSToSlack
         {
             if(__overrideAlertNotificationConfigs == null)
             {
-                using (var tr = File.OpenText("./Configuration/overrideAlertNotificationConfig.csv"))
+                using (var tr = File.OpenText(__context.FunctionAppDirectory + "/Configuration/overrideAlertNotificationConfig.csv"))
                 {
                     var csv = new CsvReader(tr);
                     var configs = csv.GetRecords<OverrideAlertNotificationConfig>();
