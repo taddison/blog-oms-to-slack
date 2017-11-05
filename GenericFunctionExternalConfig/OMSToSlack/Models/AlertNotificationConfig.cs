@@ -2,7 +2,7 @@
 
 namespace OMSToSlack.Models
 {
-    class AlertNotificationConfig
+    public class AlertNotificationConfig
     {
         public AlertNotificationConfig(string formatString, string alertMessage, List<string> channels)
         {

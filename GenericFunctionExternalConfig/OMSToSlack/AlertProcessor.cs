@@ -40,7 +40,7 @@ namespace OMSToSlack
             }
 
             // Where should the alert go
-            var notificationConfig = GetAlertNotificationConfig(alert);
+            var notificationConfig = ConfigHelper.GetAlertNotificationConfig(alert);
 
             // Build message
             // Infra - CPU [CRIT] :: Server1 :: 56%/59%/61% (min/avg/max Processor Usage %)
@@ -60,37 +60,6 @@ namespace OMSToSlack
             {
                 await SlackHelper.SendSlackMessage(channel, message);
             }
-        }
-
-        private static AlertNotificationConfig GetAlertNotificationConfig(Alert alert)
-        {
-            var valueMultiplier = "N0";
-            if(alert.MetricName.Contains("%"))
-            {
-                valueMultiplier = "P0";
-            }
-            var channels = new List<string>();
-
-            switch (alert.MachineName)
-            {
-                case "Server1":
-                    channels.Add("#Server1Team");
-                    break;
-            }
-
-            switch (alert.MetricName)
-            {
-                case "Free Megabytes":
-                    channels.Add("#memory-monitors");
-                    break;
-            }
-
-            if(channels.Count == 0)
-            {
-                channels.Add("#default");
-            }
-
-            return new AlertNotificationConfig(valueMultiplier, "ALARM", channels);
         }
     }
 }
