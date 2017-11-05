@@ -8,6 +8,11 @@ namespace OMSToSlack
 {
     public static class ConfigHelper
     {
+        private static List<DefaultAlertConfig> __defaultAlertConfigs;
+        private static List<OverrideAlertConfig> __overrideAlertConfigs;
+        private static List<DefaultAlertNotificationConfig> __defaultAlertNotificationConfigs;
+        private static List<OverrideAlertNotificationConfig> __overrideAlertNotificationConfigs;
+
         public static AlertConfig GetAlertConfig(Alert alert)
         {
             var defaultConfig = GetDefaultAlertConfigs().Single(c => c.MetricName == alert.MetricName);
@@ -21,30 +26,6 @@ namespace OMSToSlack
                 , overrideConfig?.MinimumViolationsToAlert ?? defaultConfig.MinimumViolationsToAlert
                 , defaultConfig.ValueMultiplier
                 );
-        }
-
-        private static List<DefaultAlertConfig> GetDefaultAlertConfigs()
-        {
-            // TODO: Unique on metricName
-            var configs = new List<DefaultAlertConfig>
-            {
-                new DefaultAlertConfig("Processor Usage %", 0.35, 0.5, false, 3, 0.01),
-                new DefaultAlertConfig("Free Space %", 0.2, 0.1, true, 1, 0.01),
-                new DefaultAlertConfig("Free Megabytes", 10000, 5000, true, 1, 1)
-            };
-
-            return configs;
-        }
-
-        private static List<OverrideAlertConfig> GetOverrideAlertConfigs()
-        {
-            // TODO: Unique on metric + machine names
-            var configs = new List<OverrideAlertConfig>
-            {
-                new OverrideAlertConfig("Processor Usage %", "Server2", 0.2, 0.4, 3)
-            };
-
-            return configs;
         }
 
         public static AlertNotificationConfig GetAlertNotificationConfig(Alert alert)
@@ -112,40 +93,76 @@ namespace OMSToSlack
             );
         }
 
+        private static List<DefaultAlertConfig> GetDefaultAlertConfigs()
+        {
+            if(__defaultAlertConfigs == null)
+            {
+                // TODO: Unique on metricName
+                __defaultAlertConfigs = new List<DefaultAlertConfig>
+                {
+                    new DefaultAlertConfig("Processor Usage %", 0.35, 0.5, false, 3, 0.01),
+                    new DefaultAlertConfig("Free Space %", 0.2, 0.1, true, 1, 0.01),
+                    new DefaultAlertConfig("Free Megabytes", 10000, 5000, true, 1, 1)
+                };
+            }
+
+            return __defaultAlertConfigs;
+        }
+
+        private static List<OverrideAlertConfig> GetOverrideAlertConfigs()
+        {
+            if(__overrideAlertConfigs == null)
+            {
+                // TODO: Unique on metric + machine names
+                __overrideAlertConfigs = new List<OverrideAlertConfig>
+                {
+                    new OverrideAlertConfig("Processor Usage %", "Server2", 0.2, 0.4, 3)
+                };
+            }
+
+            return __overrideAlertConfigs;
+        }
+
         private static List<DefaultAlertNotificationConfig> GetDefaultAlertNotificationConfigs()
         {
-            var defaultChannels = new List<string> { "#alerts" };
-
-            var configs = new List<DefaultAlertNotificationConfig>
+            if( __defaultAlertNotificationConfigs is null)
             {
-                new DefaultAlertNotificationConfig("Processor Usage %", defaultChannels, "P0", "Infra - CPU"),
-                new DefaultAlertNotificationConfig("Free Space %", defaultChannels, "P0", "Infra - Drive Space"),
-                new DefaultAlertNotificationConfig("Free Megabytes", defaultChannels, "N0", "Infra - Memory")
-            };
+                var defaultChannels = new List<string> { "#alerts" };
 
-            return configs;
+                __defaultAlertNotificationConfigs = new List<DefaultAlertNotificationConfig>
+                {
+                    new DefaultAlertNotificationConfig("Processor Usage %", defaultChannels, "P0", "Infra - CPU"),
+                    new DefaultAlertNotificationConfig("Free Space %", defaultChannels, "P0", "Infra - Drive Space"),
+                    new DefaultAlertNotificationConfig("Free Megabytes", defaultChannels, "N0", "Infra - Memory")
+                };
+            }
+
+            return __defaultAlertNotificationConfigs;
         }
 
         private static List<OverrideAlertNotificationConfig> GetOverrideAlertNotificationConfigs()
         {
-            var configs = new List<OverrideAlertNotificationConfig>
+            if(__overrideAlertNotificationConfigs == null)
             {
-                new OverrideAlertNotificationConfig(
-                    machineName: "Server1"
-                    ,channels: new List<string> { "#Server1Team" }
-                ),
-                new OverrideAlertNotificationConfig(
-                    metricName: "Free Space %"
-                    ,channels: new List<string> { "#memory-monitors" }
-                ),
-                new OverrideAlertNotificationConfig(
-                    metricName: "Processor Usage %"
-                    ,machineName: "Server2"
-                    ,channels: new List<string> { "#server2-cpu" }
-                )
-            };
+                __overrideAlertNotificationConfigs= new List<OverrideAlertNotificationConfig>
+                {
+                    new OverrideAlertNotificationConfig(
+                        machineName: "Server1"
+                        ,channels: new List<string> { "#Server1Team" }
+                    ),
+                    new OverrideAlertNotificationConfig(
+                        metricName: "Free Space %"
+                        ,channels: new List<string> { "#memory-monitors" }
+                    ),
+                    new OverrideAlertNotificationConfig(
+                        metricName: "Processor Usage %"
+                        ,machineName: "Server2"
+                        ,channels: new List<string> { "#server2-cpu" }
+                    )
+                }; 
+            }
 
-            return configs;
+            return __overrideAlertNotificationConfigs;
         }
     }
 }
