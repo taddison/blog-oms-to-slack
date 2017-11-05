@@ -1,7 +1,6 @@
-﻿using OMSToSlack.Models.Configs;
+﻿using OMSToSlack.Models;
+using OMSToSlack.Models.Configs;
 using System.Collections.Generic;
-using System;
-using OMSToSlack.Models;
 using System.Linq;
 
 namespace OMSToSlack
@@ -56,7 +55,7 @@ namespace OMSToSlack
                 && o.Channels?.Count() > 0);
             if(machineMatch != null)
             {
-                if(isDefaultChannels == true)
+                if(isDefaultChannels)
                 {
                     channels = machineMatch.Channels;
                     isDefaultChannels = false;
@@ -75,7 +74,7 @@ namespace OMSToSlack
                 && o.Channels?.Count() > 0);
             if (metricMatch != null)
             {
-                if (isDefaultChannels == true)
+                if (isDefaultChannels)
                 {
                     channels = metricMatch.Channels;
                     isDefaultChannels = false;
