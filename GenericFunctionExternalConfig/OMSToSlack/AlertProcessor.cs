@@ -30,11 +30,11 @@ namespace OMSToSlack
             // Aggregate metrics to produce a single summary record
             var totals = alert.MetricValues.GroupBy(_ => 1).Select(g => new
             {
-                Average = g.Average(m => m.Value)
-                ,Min = g.Min(m => m.Value)
-                ,Max = g.Max(m => m.Value)
-                ,Critical = g.Count(m => comparison(m.Value, criticalThreshold))
-                ,Warning = g.Count(m => comparison(m.Value, warningThreshold))
+                Average = g.Average(m => m.Value * alertConfig.ValueMultiplier)
+                ,Min = g.Min(m => m.Value * alertConfig.ValueMultiplier)
+                ,Max = g.Max(m => m.Value * alertConfig.ValueMultiplier)
+                ,Critical = g.Count(m => comparison(m.Value * alertConfig.ValueMultiplier, criticalThreshold))
+                ,Warning = g.Count(m => comparison(m.Value * alertConfig.ValueMultiplier, warningThreshold))
             }).Single();
 
             // Determine alert criticality
@@ -69,16 +69,35 @@ namespace OMSToSlack
 
         private static AlertConfig GetAlertConfig(string metricName)
         {
+            var valueMultiplier = 1d;
+            var formatString = "N0";
+            var lessThanThresholdIsBad = true;
+
+            switch(metricName)
+            {
+                case "Processor Usage %":
+                    valueMultiplier = 0.01;
+                    formatString = "P0";
+                    lessThanThresholdIsBad = false;
+                    break;
+                case "Free Space %":
+                    valueMultiplier = 0.01;
+                    formatString = "P0";
+                    break;
+                default:
+                    break;
+            }
+
             return new AlertConfig(
                 "#database"
                 , 0.5
                 , 0.75
-                , true
+                , lessThanThresholdIsBad
                 , "ALARM"
                 , metricName
-                , "N0"
+                , formatString
                 , 1
-                , 1.0
+                , valueMultiplier
                 );
         }
 
