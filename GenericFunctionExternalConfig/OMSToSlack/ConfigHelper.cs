@@ -12,24 +12,14 @@ namespace OMSToSlack
         {
             var defaultConfig = GetDefaultAlertConfigs().Single(c => c.MetricName == alert.MetricName);
 
-            var valueMultiplier = defaultConfig.ValueMultiplier;
-            var lessThanThresholdIsBad = defaultConfig.LessThanThresholdIsBad;
-            var minimumViolations = defaultConfig.MinimumViolationsToAlert;
-            var warning = defaultConfig.WarningThreshold;
-            var critical = defaultConfig.CriticalThreshold;
-
             var overrideConfig = GetOverrideAlertConfigs().FirstOrDefault(c => c.MetricName == alert.MetricName && c.MachineName == alert.MachineName);
 
-            warning = overrideConfig?.WarningThreshold ?? warning;
-            critical = overrideConfig?.CriticalThreshold ?? critical;
-            minimumViolations = overrideConfig?.MinimumViolationsToAlert ?? minimumViolations;
-
             return new AlertConfig(
-                warning
-                , critical
-                , lessThanThresholdIsBad
-                , minimumViolations
-                , valueMultiplier
+                overrideConfig?.WarningThreshold ?? defaultConfig.WarningThreshold
+                , overrideConfig?.CriticalThreshold ?? defaultConfig.CriticalThreshold
+                , defaultConfig.LessThanThresholdIsBad
+                , overrideConfig?.MinimumViolationsToAlert ?? defaultConfig.MinimumViolationsToAlert
+                , defaultConfig.ValueMultiplier
                 );
         }
 
