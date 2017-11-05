@@ -1,0 +1,4 @@
+﻿metricName,channel,formatString,alertMessage
+Processor Usage %,#alerts,P0,Infra - CPU
+Free Space %,#alerts,P0,Infra - Drive
+Free Megabytes,#alerts,N0,Infra - Memory

@@ -1,6 +1,8 @@
-﻿using OMSToSlack.Models;
+﻿using CsvHelper;
+using OMSToSlack.Models;
 using OMSToSlack.Models.Configs;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace OMSToSlack
@@ -30,20 +32,22 @@ namespace OMSToSlack
         public static AlertNotificationConfig GetAlertNotificationConfig(Alert alert)
         {
             var defaultConfig = GetDefaultAlertNotificationConfigs().Single(c => c.MetricName == alert.MetricName);
-            var channels = defaultConfig.Channels;
+            var channels = new List<string> { defaultConfig.Channel };
             var isDefaultChannels = true;
             var overrides = GetOverrideAlertNotificationConfigs();
+
+            // TODO: Support for multiple matches on overrides [to add multiple channels]
 
             // MachineName + MetricName override
             var exactMatch = overrides.FirstOrDefault(o =>
                 (o.MachineName != null && o.MetricName != null)
                 && o.MachineName == alert.MachineName
                 && o.MetricName == o.MetricName
-                && o.Channels?.Count() > 0);
+                && o.Channel?.Count() > 0);
             if(exactMatch != null)
             {
                 // Overwrite
-                channels = exactMatch.Channels;
+                channels = new List<string> { exactMatch.Channel };
                 isDefaultChannels = false;
             }
 
@@ -52,17 +56,17 @@ namespace OMSToSlack
                 o.MachineName != null 
                 && o.MetricName == null 
                 && o.MachineName == alert.MachineName 
-                && o.Channels?.Count() > 0);
+                && o.Channel?.Count() > 0);
             if(machineMatch != null)
             {
                 if(isDefaultChannels)
                 {
-                    channels = machineMatch.Channels;
+                    channels = new List<string> { machineMatch.Channel };
                     isDefaultChannels = false;
                 }
                 else
                 {
-                    channels = channels.Union(machineMatch.Channels).ToList();
+                    channels = channels.Union(new List<string> { machineMatch.Channel }).ToList();
                 }
             }
 
@@ -71,17 +75,17 @@ namespace OMSToSlack
                 o.MetricName != null
                 && o.MachineName == null
                 && o.MetricName == alert.MetricName
-                && o.Channels?.Count() > 0);
+                && o.Channel?.Count() > 0);
             if (metricMatch != null)
             {
                 if (isDefaultChannels)
                 {
-                    channels = metricMatch.Channels;
+                    channels = new List<string> { metricMatch.Channel };
                     isDefaultChannels = false;
                 }
                 else
                 {
-                    channels = channels.Union(metricMatch.Channels).ToList();
+                    channels = channels.Union(new List<string> { metricMatch.Channel }).ToList();
                 }
             }
 
@@ -96,13 +100,13 @@ namespace OMSToSlack
         {
             if(__defaultAlertConfigs == null)
             {
-                // TODO: Unique on metricName
-                __defaultAlertConfigs = new List<DefaultAlertConfig>
+                using (var tr = File.OpenText("./Configuration/defaultAlertConfig.csv"))
                 {
-                    new DefaultAlertConfig("Processor Usage %", 0.35, 0.5, false, 3, 0.01),
-                    new DefaultAlertConfig("Free Space %", 0.2, 0.1, true, 1, 0.01),
-                    new DefaultAlertConfig("Free Megabytes", 10000, 5000, true, 1, 1)
-                };
+                    // TODO: Unique on metricName
+                    var csv = new CsvReader(tr);
+                    var configs = csv.GetRecords<DefaultAlertConfig>();
+                    __defaultAlertConfigs = configs.ToList();
+                }
             }
 
             return __defaultAlertConfigs;
@@ -113,10 +117,12 @@ namespace OMSToSlack
             if(__overrideAlertConfigs == null)
             {
                 // TODO: Unique on metric + machine names
-                __overrideAlertConfigs = new List<OverrideAlertConfig>
+                using (var tr = File.OpenText("./Configuration/overrideAlertConfig.csv"))
                 {
-                    new OverrideAlertConfig("Processor Usage %", "Server2", 0.2, 0.4, 3)
-                };
+                    var csv = new CsvReader(tr);
+                    var configs = csv.GetRecords<OverrideAlertConfig>();
+                    __overrideAlertConfigs = configs.ToList();
+                }
             }
 
             return __overrideAlertConfigs;
@@ -126,14 +132,12 @@ namespace OMSToSlack
         {
             if( __defaultAlertNotificationConfigs is null)
             {
-                var defaultChannels = new List<string> { "#alerts" };
-
-                __defaultAlertNotificationConfigs = new List<DefaultAlertNotificationConfig>
+                using (var tr = File.OpenText("./Configuration/defaultAlertNotificationConfig.csv"))
                 {
-                    new DefaultAlertNotificationConfig("Processor Usage %", defaultChannels, "P0", "Infra - CPU"),
-                    new DefaultAlertNotificationConfig("Free Space %", defaultChannels, "P0", "Infra - Drive Space"),
-                    new DefaultAlertNotificationConfig("Free Megabytes", defaultChannels, "N0", "Infra - Memory")
-                };
+                    var csv = new CsvReader(tr);
+                    var configs = csv.GetRecords<DefaultAlertNotificationConfig>();
+                    __defaultAlertNotificationConfigs = configs.ToList();
+                }
             }
 
             return __defaultAlertNotificationConfigs;
@@ -143,22 +147,12 @@ namespace OMSToSlack
         {
             if(__overrideAlertNotificationConfigs == null)
             {
-                __overrideAlertNotificationConfigs= new List<OverrideAlertNotificationConfig>
+                using (var tr = File.OpenText("./Configuration/overrideAlertNotificationConfig.csv"))
                 {
-                    new OverrideAlertNotificationConfig(
-                        machineName: "Server1"
-                        ,channels: new List<string> { "#Server1Team" }
-                    ),
-                    new OverrideAlertNotificationConfig(
-                        metricName: "Free Space %"
-                        ,channels: new List<string> { "#memory-monitors" }
-                    ),
-                    new OverrideAlertNotificationConfig(
-                        metricName: "Processor Usage %"
-                        ,machineName: "Server2"
-                        ,channels: new List<string> { "#server2-cpu" }
-                    )
-                }; 
+                    var csv = new CsvReader(tr);
+                    var configs = csv.GetRecords<OverrideAlertNotificationConfig>();
+                    __overrideAlertNotificationConfigs = configs.ToList();
+                }
             }
 
             return __overrideAlertNotificationConfigs;

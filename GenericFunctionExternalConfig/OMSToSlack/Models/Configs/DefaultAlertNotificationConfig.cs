@@ -1,20 +1,18 @@
-﻿using System.Collections.Generic;
-
-namespace OMSToSlack.Models.Configs
+﻿namespace OMSToSlack.Models.Configs
 {
     public class DefaultAlertNotificationConfig
     {
-        public DefaultAlertNotificationConfig(string metricName, List<string> channels, string formatString, string alertMessage)
+        public DefaultAlertNotificationConfig(string metricName, string channel, string formatString, string alertMessage)
         {
             MetricName = metricName;
-            Channels = channels;
+            Channel = channel;
             FormatString = formatString;
             AlertMessage = alertMessage;
         }
 
-        public string MetricName { get; set; }
-        public List<string> Channels { get; set; }
-        public string FormatString { get; set; }
-        public string AlertMessage { get; set; }
+        public string MetricName { get; private set; }
+        public string Channel { get; private set; }
+        public string FormatString { get; private set; }
+        public string AlertMessage { get; private set; }
     }
 }

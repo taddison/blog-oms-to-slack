@@ -1,0 +1,2 @@
+﻿metricName,machineName,warningThreshold,criticalThreshold,minimumViolationsToAlert
+Processor Usage %,Server 2,0.3,0.4,

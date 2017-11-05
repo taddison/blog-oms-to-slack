@@ -1,0 +1,4 @@
+﻿metricName,machineName,channel
+,Server1,#Server1Team
+Free Space %,,#memory-monitors
+Processor Usage %,Server2,#server2-cpu
