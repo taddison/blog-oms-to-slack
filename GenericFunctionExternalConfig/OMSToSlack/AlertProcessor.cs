@@ -12,16 +12,18 @@ namespace OMSToSlack
 
         public static async void ProcessAlert(Alert alert)
         {
+            var alertConfig = GetAlertConfig(alert.MetricName);
+
             // Is this a < or > alert?
-            var comparison = alert.LessThanThresholdIsBad ? LessThan : MoreThan;
+            var comparison = alertConfig.LessThanThresholdIsBad ? LessThan : MoreThan;
 
             // Machine-specific overrides?
             var (warning, critical) = GetMachineDefaultThresholdOverrides(alert.MachineName, alert.MetricName);
-            var criticalThreshold = critical ?? alert.DefaultCriticalThreshold;
-            var warningThreshold = warning ?? alert.DefaultWarningThreshold;
+            var criticalThreshold = critical ?? alertConfig.DefaultCriticalThreshold;
+            var warningThreshold = warning ?? alertConfig.DefaultWarningThreshold;
 
             // Where should the alert go
-            IEnumerable<string> channels = new List<string>() { alert.DefaultChannel };
+            IEnumerable<string> channels = new List<string>() { alertConfig.DefaultChannel };
             channels = channels.Union(GetMachineChannels(alert.MachineName));
             channels = channels.Union(GetMetricChannels(alert.MetricName));
 
@@ -36,8 +38,8 @@ namespace OMSToSlack
             }).Single();
 
             // Determine alert criticality
-            var isWarning = totals.Warning >= alert.ObservationThreshold;
-            var isCritical = totals.Critical >= alert.ObservationThreshold;
+            var isWarning = totals.Warning >= alertConfig.ObservationThreshold;
+            var isCritical = totals.Critical >= alertConfig.ObservationThreshold;
             
             // If the alert doesn't cross the warning threshold return
             if(!isWarning)
@@ -49,8 +51,8 @@ namespace OMSToSlack
             // Infra - CPU [CRIT] :: Server1 :: 56%/59%/61% (min/avg/max Processor Usage %)
             // Infra - Disk [WARN] :: Server1 - E: :: 5%/6%/6% (min/avg/max Free Space %)
             var instance = string.IsNullOrWhiteSpace(alert.InstanceName) ? "" : $" - {alert.InstanceName}";
-            var message = $"{alert.DefaultAlertMessage} [{(isCritical ? "CRIT" : "WARN")}] :: {alert.MachineName}{instance} :: ";
-            message += $"{totals.Min.ToString(alert.FormatString)}/{totals.Average.ToString(alert.FormatString)}/{totals.Max.ToString(alert.FormatString)} ";
+            var message = $"{alertConfig.DefaultAlertMessage} [{(isCritical ? "CRIT" : "WARN")}] :: {alert.MachineName}{instance} :: ";
+            message += $"{totals.Min.ToString(alertConfig.FormatString)}/{totals.Average.ToString(alertConfig.FormatString)}/{totals.Max.ToString(alertConfig.FormatString)} ";
             message += $"(min/avg/max {alert.MetricName})";
             
             if(isCritical)
@@ -63,6 +65,21 @@ namespace OMSToSlack
             {
                 await SlackHelper.SendSlackMessage(channel, message);
             }
+        }
+
+        private static AlertConfig GetAlertConfig(string metricName)
+        {
+            return new AlertConfig(
+                "#database"
+                , 0.5
+                , 0.75
+                , true
+                , "ALARM"
+                , metricName
+                , "N0"
+                , 1
+                , 1.0
+                );
         }
 
         private static (double? warningThreshold, double? criticalThreshold) GetMachineDefaultThresholdOverrides(string machineName, string metricName)
