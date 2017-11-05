@@ -19,8 +19,8 @@ namespace OMSToSlack
 
             // Machine-specific overrides?
             var (warning, critical) = GetMachineDefaultThresholdOverrides(alert.MachineName, alert.MetricName);
-            var criticalThreshold = critical ?? alertConfig.DefaultCriticalThreshold;
-            var warningThreshold = warning ?? alertConfig.DefaultWarningThreshold;
+            var criticalThreshold = critical ?? alertConfig.CriticalThreshold;
+            var warningThreshold = warning ?? alertConfig.WarningThreshold;
 
             // Where should the alert go
             var defaultChannel = "#alerts";

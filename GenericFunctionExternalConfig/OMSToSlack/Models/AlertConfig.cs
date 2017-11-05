@@ -5,8 +5,8 @@
         public AlertConfig(double warningThreshold, double criticalThreshold, bool lessThanThresholdIsBad
             , string alertMessage, string metricName, string formatString, int minimumViolationsToAlert, double valueMultiplier)
         {
-            DefaultWarningThreshold = warningThreshold;
-            DefaultCriticalThreshold = criticalThreshold;
+            WarningThreshold = warningThreshold;
+            CriticalThreshold = criticalThreshold;
             DefaultAlertMessage = alertMessage;
             LessThanThresholdIsBad = lessThanThresholdIsBad;
             MinimumViolationsToAlert = minimumViolationsToAlert;
@@ -15,8 +15,8 @@
             ValueMultiplier = valueMultiplier;
         }
 
-        public double DefaultWarningThreshold { get; private set; }
-        public double DefaultCriticalThreshold { get; private set; }
+        public double WarningThreshold { get; private set; }
+        public double CriticalThreshold { get; private set; }
         public int MinimumViolationsToAlert { get; private set; }
         public bool LessThanThresholdIsBad { get; private set; }
         public string DefaultAlertMessage { get; private set; }
