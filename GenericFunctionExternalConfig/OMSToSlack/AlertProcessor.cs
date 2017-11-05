@@ -14,6 +14,12 @@ namespace OMSToSlack
         {
             var alertConfig = GetAlertConfig(alert.MetricName);
 
+            // Process metrics
+            foreach(var mv in alert.MetricValues)
+            {
+                mv.Value = mv.Value * alertConfig.ValueMultiplier;
+            }
+
             // Is this a < or > alert?
             var comparison = alertConfig.LessThanThresholdIsBad ? LessThan : MoreThan;
 
@@ -31,11 +37,11 @@ namespace OMSToSlack
             // Aggregate metrics to produce a single summary record
             var totals = alert.MetricValues.GroupBy(_ => 1).Select(g => new
             {
-                Average = g.Average(m => m.Value * alertConfig.ValueMultiplier)
-                ,Min = g.Min(m => m.Value * alertConfig.ValueMultiplier)
-                ,Max = g.Max(m => m.Value * alertConfig.ValueMultiplier)
-                ,Critical = g.Count(m => comparison(m.Value * alertConfig.ValueMultiplier, criticalThreshold))
-                ,Warning = g.Count(m => comparison(m.Value * alertConfig.ValueMultiplier, warningThreshold))
+                Average = g.Average(m => m.Value)
+                ,Min = g.Min(m => m.Value)
+                ,Max = g.Max(m => m.Value)
+                ,Critical = g.Count(m => comparison(m.Value, criticalThreshold))
+                ,Warning = g.Count(m => comparison(m.Value, warningThreshold))
             }).Single();
 
             // Determine alert criticality
