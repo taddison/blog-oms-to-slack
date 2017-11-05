@@ -90,8 +90,7 @@ namespace OMSToSlack
             }
 
             return new AlertConfig(
-                "#database"
-                , 0.5
+                0.5
                 , 0.75
                 , lessThanThresholdIsBad
                 , "ALARM"
