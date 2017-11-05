@@ -1,10 +1,11 @@
-﻿namespace OMSToSlack.Models
+﻿namespace OMSToSlack.Models.Configs
 {
-    public class AlertConfig
+    public class DefaultAlertConfig
     {
-        public AlertConfig(double warningThreshold, double criticalThreshold, bool lessThanThresholdIsBad
+        public DefaultAlertConfig(string metricName, double warningThreshold, double criticalThreshold, bool lessThanThresholdIsBad
             , int minimumViolationsToAlert, double valueMultiplier)
         {
+            MetricName = metricName;
             WarningThreshold = warningThreshold;
             CriticalThreshold = criticalThreshold;
             LessThanThresholdIsBad = lessThanThresholdIsBad;
@@ -12,7 +13,8 @@
             ValueMultiplier = valueMultiplier;
         }
 
-        public double ValueMultiplier { get; set; }
+        public string MetricName { get; private set; }
+        public double ValueMultiplier { get; private set; }
         public double WarningThreshold { get; private set; }
         public double CriticalThreshold { get; private set; }
         public bool LessThanThresholdIsBad { get; private set; }

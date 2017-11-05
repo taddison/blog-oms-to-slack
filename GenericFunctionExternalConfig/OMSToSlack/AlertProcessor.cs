@@ -64,40 +64,14 @@ namespace OMSToSlack
 
         private static AlertConfig GetAlertConfig(Alert alert)
         {
-            var valueMultiplier = 1d;
-            var lessThanThresholdIsBad = true;
+            var defaultConfig = ConfigHelper.GetDefaultAlertConfigs().Single(c => c.MetricName == alert.MetricName);
 
-            switch(alert.MetricName)
-            {
-                case "Processor Usage %":
-                    valueMultiplier = 0.01;
-                    lessThanThresholdIsBad = false;
-                    break;
-                case "Free Space %":
-                    valueMultiplier = 0.01;
-                    break;
-            }
-
-            var warning = 0.5;
-            var critical = 0.75;
-            var minimumViolations = 1;
-
-            switch (alert.MetricName)
-            {
-                case "Free Megabytes":
-                    warning = 10000d;
-                    critical = 5000d;
-                    break;
-                case "Free Space %":
-                    warning = 0.2;
-                    critical = 0.1;
-                    break;
-                case "Processor Usage %":
-                    warning = 0.35;
-                    critical = 0.5;
-                    break;
-            }
-
+            var valueMultiplier = defaultConfig.ValueMultiplier;
+            var lessThanThresholdIsBad = defaultConfig.LessThanThresholdIsBad;
+            var minimumViolations = defaultConfig.MinimumViolationsToAlert;
+            var warning = defaultConfig.WarningThreshold;
+            var critical = defaultConfig.CriticalThreshold;
+            
             var combined = $"{alert.MachineName}|{alert.MetricName}";
 
             switch (combined)
