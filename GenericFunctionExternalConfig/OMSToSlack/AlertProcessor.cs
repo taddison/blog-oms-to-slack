@@ -12,16 +12,10 @@ namespace OMSToSlack
 
         public static async void ProcessAlert(Alert alert)
         {
-            var alertConfig = GetAlertConfig(alert.MetricName);
+            var alertConfig = GetAlertConfig(alert);
 
             // Is this a < or > alert?
             var comparison = alertConfig.LessThanThresholdIsBad ? LessThan : MoreThan;
-
-            // Machine-specific overrides?
-            // TODO: This needs to be baked into GetAlertConfig
-            var (warning, critical) = GetMachineDefaultThresholdOverrides(alert.MachineName, alert.MetricName);
-            var criticalThreshold = critical ?? alertConfig.CriticalThreshold;
-            var warningThreshold = warning ?? alertConfig.WarningThreshold;
 
             // Aggregate metrics to produce a single summary record
             var processedValues = alert.MetricValues.Select(mv => mv.Value * alertConfig.ValueMultiplier);
@@ -31,8 +25,8 @@ namespace OMSToSlack
                 Average = processedValues.Average()
                 ,Min = processedValues.Min()
                 ,Max = processedValues.Max()
-                ,Critical = processedValues.Count(v => comparison(v, criticalThreshold))
-                ,Warning = processedValues.Count(v => comparison(v, warningThreshold))
+                ,Critical = processedValues.Count(v => comparison(v, alertConfig.CriticalThreshold))
+                ,Warning = processedValues.Count(v => comparison(v, alertConfig.WarningThreshold))
             };
 
             // Determine alert criticality
@@ -48,11 +42,6 @@ namespace OMSToSlack
             // Where should the alert go
             var notificationConfig = GetAlertNotificationConfig(alert);
 
-            // TODO: This should be baked into GetAlertNotificationConfig
-            IEnumerable<string> channels = new List<string>() { notificationConfig.Channel };
-            channels = channels.Union(GetMachineChannels(alert.MachineName));
-            channels = channels.Union(GetMetricChannels(alert.MetricName));
-
             // Build message
             // Infra - CPU [CRIT] :: Server1 :: 56%/59%/61% (min/avg/max Processor Usage %)
             // Infra - Disk [WARN] :: Server1 - E: :: 5%/6%/6% (min/avg/max Free Space %)
@@ -67,18 +56,18 @@ namespace OMSToSlack
             }
                 
             // Send message
-            foreach(var channel in channels)
+            foreach(var channel in notificationConfig.Channels)
             {
                 await SlackHelper.SendSlackMessage(channel, message);
             }
         }
 
-        private static AlertConfig GetAlertConfig(string metricName)
+        private static AlertConfig GetAlertConfig(Alert alert)
         {
             var valueMultiplier = 1d;
             var lessThanThresholdIsBad = true;
 
-            switch(metricName)
+            switch(alert.MetricName)
             {
                 case "Processor Usage %":
                     valueMultiplier = 0.01;
@@ -87,16 +76,43 @@ namespace OMSToSlack
                 case "Free Space %":
                     valueMultiplier = 0.01;
                     break;
-                default:
+            }
+
+            var warning = 0.5;
+            var critical = 0.75;
+            var minimumViolations = 1;
+
+            switch (alert.MetricName)
+            {
+                case "Free Megabytes":
+                    warning = 10000d;
+                    critical = 5000d;
+                    break;
+                case "Free Space %":
+                    warning = 0.2;
+                    critical = 0.1;
+                    break;
+                case "Processor Usage %":
+                    warning = 0.35;
+                    critical = 0.5;
                     break;
             }
 
+            var combined = $"{alert.MachineName}|{alert.MetricName}";
+
+            switch (combined)
+            {
+                case "Server2|Processor Usage %":
+                    warning = 0.8d;
+                    critical = 0.9d;
+                    break;
+            }
+            
             return new AlertConfig(
-                0.5
-                , 0.75
+                warning
+                , critical
                 , lessThanThresholdIsBad
-                , metricName
-                , 1
+                , minimumViolations
                 , valueMultiplier
                 );
         }
@@ -108,43 +124,28 @@ namespace OMSToSlack
             {
                 valueMultiplier = "P0";
             }
+            var channels = new List<string>();
 
-            return new AlertNotificationConfig(valueMultiplier, "ALARM", "#database");
-        }
-
-        private static (double? warningThreshold, double? criticalThreshold) GetMachineDefaultThresholdOverrides(string machineName, string metricName)
-        {
-            var combined = $"{machineName}|{metricName}";
-
-            switch(combined)
-            {
-                case "Server2|Processor Usage %":
-                    return (0.8, 0.9);
-                default:
-                    return (null, null);
-            }
-        }
-
-        private static IEnumerable<string> GetMachineChannels(string machineName)
-        {
-            switch (machineName)
+            switch (alert.MachineName)
             {
                 case "Server1":
-                    return new List<string>() { "#Server1Team" };
-                default:
-                    return new List<string>();
+                    channels.Add("#Server1Team");
+                    break;
             }
-        }
 
-        private static IEnumerable<string> GetMetricChannels(string metricName)
-        {
-            switch (metricName)
+            switch (alert.MetricName)
             {
                 case "Free Megabytes":
-                    return new List<string>() { "#memory-monitors" };
-                default:
-                    return new List<string>();
+                    channels.Add("#memory-monitors");
+                    break;
             }
+
+            if(channels.Count == 0)
+            {
+                channels.Add("#default");
+            }
+
+            return new AlertNotificationConfig(valueMultiplier, "ALARM", channels);
         }
     }
 }
