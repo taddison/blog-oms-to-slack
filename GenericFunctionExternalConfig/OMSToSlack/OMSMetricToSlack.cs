@@ -11,9 +11,15 @@ using System.Threading.Tasks;
 
 public class OMSMetricToSlack
 {
+    private static AlertProcessor __processor;
+
     [FunctionName("OMSMetricToSlack")]
     public static async Task<object> Run([HttpTrigger(WebHookType = "genericJson")]HttpRequestMessage req, TraceWriter log, ExecutionContext context)
     {
+        if(__processor == null)
+        {
+            __processor = new AlertProcessor(context);
+        }
         var data = await req.Content.ReadAsAsync<OMSPayload>();
 
         var metrics = data.SearchResults.Tables[0].Rows.Select(r =>
@@ -34,7 +40,7 @@ public class OMSMetricToSlack
 
         var alert = new Alert(data.MetricName, computerName, instanceName, metrics);
 
-        AlertProcessor.ProcessAlert(alert, context);
+        __processor.ProcessAlert(alert);
         
         return req.CreateResponse(HttpStatusCode.OK);
     }

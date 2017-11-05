@@ -1,21 +1,24 @@
 ﻿using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using OMSToSlack.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace OMSToSlack
 {
-    public static class AlertProcessor
+    public class AlertProcessor
     {
         private static Func<double, double, bool> LessThan = (double value, double threshold) => { return value < threshold; };
         private static Func<double, double, bool> MoreThan = (double value, double threshold) => { return value > threshold; };
+        private ConfigHelper _configHelper;
 
-        public static async void ProcessAlert(Alert alert, ExecutionContext context)
+        public AlertProcessor(ExecutionContext context)
         {
-            var helper = new ConfigHelper(context);
-            var alertConfig = helper.GetAlertConfig(alert, context);
+            _configHelper = new ConfigHelper(context);
+        }
+
+        public async void ProcessAlert(Alert alert)
+        {
+            var alertConfig = _configHelper.GetAlertConfig(alert);
 
             // Is this a < or > alert?
             var comparison = alertConfig.LessThanThresholdIsBad ? LessThan : MoreThan;
@@ -43,7 +46,7 @@ namespace OMSToSlack
             }
 
             // Where should the alert go
-            var notificationConfig = helper.GetAlertNotificationConfig(alert);
+            var notificationConfig = _configHelper.GetAlertNotificationConfig(alert);
 
             // Build message
             // Infra - CPU [CRIT] :: Server1 :: 56%/59%/61% (min/avg/max Processor Usage %)

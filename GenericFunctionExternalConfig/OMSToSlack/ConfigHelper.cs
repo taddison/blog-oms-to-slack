@@ -25,7 +25,7 @@ namespace OMSToSlack
             _overrideAlertNotificationConfigs = GetOverrideAlertNotificationConfigs();
         }
 
-        public AlertConfig GetAlertConfig(Alert alert, ExecutionContext context)
+        public AlertConfig GetAlertConfig(Alert alert)
         {
             var defaultConfig = _defaultAlertConfigs.Single(c => c.MetricName == alert.MetricName);
             
