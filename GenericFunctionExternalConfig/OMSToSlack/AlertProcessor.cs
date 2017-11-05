@@ -12,7 +12,7 @@ namespace OMSToSlack
 
         public static async void ProcessAlert(Alert alert)
         {
-            var alertConfig = GetAlertConfig(alert);
+            var alertConfig = ConfigHelper.GetAlertConfig(alert);
 
             // Is this a < or > alert?
             var comparison = alertConfig.LessThanThresholdIsBad ? LessThan : MoreThan;
@@ -60,35 +60,6 @@ namespace OMSToSlack
             {
                 await SlackHelper.SendSlackMessage(channel, message);
             }
-        }
-
-        private static AlertConfig GetAlertConfig(Alert alert)
-        {
-            var defaultConfig = ConfigHelper.GetDefaultAlertConfigs().Single(c => c.MetricName == alert.MetricName);
-
-            var valueMultiplier = defaultConfig.ValueMultiplier;
-            var lessThanThresholdIsBad = defaultConfig.LessThanThresholdIsBad;
-            var minimumViolations = defaultConfig.MinimumViolationsToAlert;
-            var warning = defaultConfig.WarningThreshold;
-            var critical = defaultConfig.CriticalThreshold;
-            
-            var combined = $"{alert.MachineName}|{alert.MetricName}";
-
-            switch (combined)
-            {
-                case "Server2|Processor Usage %":
-                    warning = 0.8d;
-                    critical = 0.9d;
-                    break;
-            }
-            
-            return new AlertConfig(
-                warning
-                , critical
-                , lessThanThresholdIsBad
-                , minimumViolations
-                , valueMultiplier
-                );
         }
 
         private static AlertNotificationConfig GetAlertNotificationConfig(Alert alert)
