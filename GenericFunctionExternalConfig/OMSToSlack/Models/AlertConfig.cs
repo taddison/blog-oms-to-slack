@@ -3,13 +3,13 @@
     class AlertConfig
     {
         public AlertConfig(double warningThreshold, double criticalThreshold, bool lessThanThresholdIsBad
-            , string alertMessage, string metricName, string formatString, int observationThreshold, double valueMultiplier)
+            , string alertMessage, string metricName, string formatString, int minimumViolationsToAlert, double valueMultiplier)
         {
             DefaultWarningThreshold = warningThreshold;
             DefaultCriticalThreshold = criticalThreshold;
             DefaultAlertMessage = alertMessage;
             LessThanThresholdIsBad = lessThanThresholdIsBad;
-            ObservationThreshold = observationThreshold;
+            MinimumViolationsToAlert = minimumViolationsToAlert;
             MetricName = metricName;
             FormatString = formatString;
             ValueMultiplier = valueMultiplier;
@@ -17,7 +17,7 @@
 
         public double DefaultWarningThreshold { get; private set; }
         public double DefaultCriticalThreshold { get; private set; }
-        public int ObservationThreshold { get; private set; }
+        public int MinimumViolationsToAlert { get; private set; }
         public bool LessThanThresholdIsBad { get; private set; }
         public string DefaultAlertMessage { get; private set; }
         public string MetricName { get; private set; }

@@ -39,8 +39,8 @@ namespace OMSToSlack
             }).Single();
 
             // Determine alert criticality
-            var isWarning = totals.Warning >= alertConfig.ObservationThreshold;
-            var isCritical = totals.Critical >= alertConfig.ObservationThreshold;
+            var isWarning = totals.Warning >= alertConfig.MinimumViolationsToAlert;
+            var isCritical = totals.Critical >= alertConfig.MinimumViolationsToAlert;
             
             // If the alert doesn't cross the warning threshold return
             if(!isWarning)
