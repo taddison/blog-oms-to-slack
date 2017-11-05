@@ -14,7 +14,8 @@ namespace OMSToSlack
 
         public static async void ProcessAlert(Alert alert, ExecutionContext context)
         {
-            var alertConfig = ConfigHelper.GetAlertConfig(alert, context);
+            var helper = new ConfigHelper(context);
+            var alertConfig = helper.GetAlertConfig(alert, context);
 
             // Is this a < or > alert?
             var comparison = alertConfig.LessThanThresholdIsBad ? LessThan : MoreThan;
@@ -42,7 +43,7 @@ namespace OMSToSlack
             }
 
             // Where should the alert go
-            var notificationConfig = ConfigHelper.GetAlertNotificationConfig(alert);
+            var notificationConfig = helper.GetAlertNotificationConfig(alert);
 
             // Build message
             // Infra - CPU [CRIT] :: Server1 :: 56%/59%/61% (min/avg/max Processor Usage %)

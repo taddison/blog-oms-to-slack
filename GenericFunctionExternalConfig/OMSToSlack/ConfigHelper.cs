@@ -1,29 +1,35 @@
 ﻿using CsvHelper;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using OMSToSlack.Models;
 using OMSToSlack.Models.Configs;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace OMSToSlack
 {
-    public static class ConfigHelper
+    public class ConfigHelper
     {
-        private static List<DefaultAlertConfig> __defaultAlertConfigs;
-        private static List<OverrideAlertConfig> __overrideAlertConfigs;
-        private static List<DefaultAlertNotificationConfig> __defaultAlertNotificationConfigs;
-        private static List<OverrideAlertNotificationConfig> __overrideAlertNotificationConfigs;
-        private static ExecutionContext __context;
+        private ExecutionContext _context;
+        private List<DefaultAlertConfig> _defaultAlertConfigs;
+        private List<OverrideAlertConfig> _overrideAlertConfigs;
+        private List<DefaultAlertNotificationConfig> _defaultAlertNotificationConfigs;
+        private List<OverrideAlertNotificationConfig> _overrideAlertNotificationConfigs;
 
-        public static AlertConfig GetAlertConfig(Alert alert, ExecutionContext context)
+        public ConfigHelper(ExecutionContext context)
         {
-            __context = context;
-            var defaultConfig = GetDefaultAlertConfigs().Single(c => c.MetricName == alert.MetricName);
+            _context = context;
+            _defaultAlertConfigs = GetDefaultAlertConfigs();
+            _overrideAlertConfigs = GetOverrideAlertConfigs();
+            _defaultAlertNotificationConfigs = GetDefaultAlertNotificationConfigs();
+            _overrideAlertNotificationConfigs = GetOverrideAlertNotificationConfigs();
+        }
+
+        public AlertConfig GetAlertConfig(Alert alert, ExecutionContext context)
+        {
+            var defaultConfig = _defaultAlertConfigs.Single(c => c.MetricName == alert.MetricName);
             
-            var overrideConfig = GetOverrideAlertConfigs().FirstOrDefault(c => c.MetricName == alert.MetricName && c.MachineName == alert.MachineName);
+            var overrideConfig = _overrideAlertConfigs.FirstOrDefault(c => c.MetricName == alert.MetricName && c.MachineName == alert.MachineName);
 
             return new AlertConfig(
                 overrideConfig?.WarningThreshold ?? defaultConfig.WarningThreshold
@@ -34,12 +40,12 @@ namespace OMSToSlack
                 );
         }
 
-        public static AlertNotificationConfig GetAlertNotificationConfig(Alert alert)
+        public AlertNotificationConfig GetAlertNotificationConfig(Alert alert)
         {
-            var defaultConfig = GetDefaultAlertNotificationConfigs().Single(c => c.MetricName == alert.MetricName);
+            var defaultConfig = _defaultAlertNotificationConfigs.Single(c => c.MetricName == alert.MetricName);
             var channels = new List<string> { defaultConfig.Channel };
             var isDefaultChannels = true;
-            var overrides = GetOverrideAlertNotificationConfigs();
+            var overrides = _overrideAlertNotificationConfigs;
 
             // TODO: Support for multiple matches on overrides [to add multiple channels]
 
@@ -101,66 +107,42 @@ namespace OMSToSlack
             );
         }
 
-        private static List<DefaultAlertConfig> GetDefaultAlertConfigs()
+        private List<DefaultAlertConfig> GetDefaultAlertConfigs()
         {
-            if(__defaultAlertConfigs == null)
+            using (var tr = File.OpenText(_context.FunctionAppDirectory + "/Configuration/defaultAlertConfig.csv"))
             {
-                using (var tr = File.OpenText(__context.FunctionAppDirectory + "/Configuration/defaultAlertConfig.csv"))
-                {
-                    // TODO: Unique on metricName
-                    var csv = new CsvReader(tr);
-                    var configs = csv.GetRecords<DefaultAlertConfig>();
-                    __defaultAlertConfigs = configs.ToList();
-                }
+                // TODO: Unique on metricName
+                var csv = new CsvReader(tr);
+                return csv.GetRecords<DefaultAlertConfig>().ToList();
             }
-
-            return __defaultAlertConfigs;
         }
 
-        private static List<OverrideAlertConfig> GetOverrideAlertConfigs()
+        private List<OverrideAlertConfig> GetOverrideAlertConfigs()
         {
-            if(__overrideAlertConfigs == null)
+            // TODO: Unique on metric + machine names
+            using (var tr = File.OpenText(_context.FunctionAppDirectory + "/Configuration/overrideAlertConfig.csv"))
             {
-                // TODO: Unique on metric + machine names
-                using (var tr = File.OpenText(__context.FunctionAppDirectory + "/Configuration/overrideAlertConfig.csv"))
-                {
-                    var csv = new CsvReader(tr);
-                    var configs = csv.GetRecords<OverrideAlertConfig>();
-                    __overrideAlertConfigs = configs.ToList();
-                }
+                var csv = new CsvReader(tr);
+                return csv.GetRecords<OverrideAlertConfig>().ToList();
             }
-
-            return __overrideAlertConfigs;
         }
 
-        private static List<DefaultAlertNotificationConfig> GetDefaultAlertNotificationConfigs()
+        private List<DefaultAlertNotificationConfig> GetDefaultAlertNotificationConfigs()
         {
-            if( __defaultAlertNotificationConfigs is null)
+            using (var tr = File.OpenText(_context.FunctionAppDirectory + "/Configuration/defaultAlertNotificationConfig.csv"))
             {
-                using (var tr = File.OpenText(__context.FunctionAppDirectory + "/Configuration/defaultAlertNotificationConfig.csv"))
-                {
-                    var csv = new CsvReader(tr);
-                    var configs = csv.GetRecords<DefaultAlertNotificationConfig>();
-                    __defaultAlertNotificationConfigs = configs.ToList();
-                }
+                var csv = new CsvReader(tr);
+                return csv.GetRecords<DefaultAlertNotificationConfig>().ToList();
             }
-
-            return __defaultAlertNotificationConfigs;
         }
 
-        private static List<OverrideAlertNotificationConfig> GetOverrideAlertNotificationConfigs()
+        private List<OverrideAlertNotificationConfig> GetOverrideAlertNotificationConfigs()
         {
-            if(__overrideAlertNotificationConfigs == null)
+            using (var tr = File.OpenText(_context.FunctionAppDirectory + "/Configuration/overrideAlertNotificationConfig.csv"))
             {
-                using (var tr = File.OpenText(__context.FunctionAppDirectory + "/Configuration/overrideAlertNotificationConfig.csv"))
-                {
-                    var csv = new CsvReader(tr);
-                    var configs = csv.GetRecords<OverrideAlertNotificationConfig>();
-                    __overrideAlertNotificationConfigs = configs.ToList();
-                }
+                var csv = new CsvReader(tr);
+                return csv.GetRecords<OverrideAlertNotificationConfig>().ToList();
             }
-
-            return __overrideAlertNotificationConfigs;
         }
     }
 }
