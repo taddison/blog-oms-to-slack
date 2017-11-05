@@ -7,3 +7,4 @@ Post Index:
 - [Building better OMS alerts with function apps](http://tjaddison.com/2017/08/06/Building-better-OMS-alerts-with-function-apps.html)
 - [Monitoring Disk, CPU, and memory with OMS](http://tjaddison.com/2017/08/21/Monitoring-disk-cpu-and-memory-with-OMS.html)
 - [Migrating function app scripts with a class library](http://tjaddison.com/2017/08/21/Monitoring-disk-cpu-and-memory-with-OMS.html)
+- [Building an OMS metric alert to Slack bridge with Azure functions](http://tjaddison.com/2017/08/29/Building-an-OMS-metric-alert-to-Slack-bridge-with-Azure-functions)
