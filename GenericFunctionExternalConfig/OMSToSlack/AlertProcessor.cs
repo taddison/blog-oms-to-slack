@@ -23,7 +23,8 @@ namespace OMSToSlack
             var warningThreshold = warning ?? alertConfig.DefaultWarningThreshold;
 
             // Where should the alert go
-            IEnumerable<string> channels = new List<string>() { alertConfig.DefaultChannel };
+            var defaultChannel = "#alerts";
+            IEnumerable<string> channels = new List<string>() { defaultChannel };
             channels = channels.Union(GetMachineChannels(alert.MachineName));
             channels = channels.Union(GetMetricChannels(alert.MetricName));
 

@@ -2,10 +2,9 @@
 {
     class AlertConfig
     {
-        public AlertConfig(string defaultChannel, double warningThreshold, double criticalThreshold, bool lessThanThresholdIsBad
+        public AlertConfig(double warningThreshold, double criticalThreshold, bool lessThanThresholdIsBad
             , string alertMessage, string metricName, string formatString, int observationThreshold, double valueMultiplier)
         {
-            DefaultChannel = defaultChannel;
             DefaultWarningThreshold = warningThreshold;
             DefaultCriticalThreshold = criticalThreshold;
             DefaultAlertMessage = alertMessage;
@@ -16,7 +15,6 @@
             ValueMultiplier = valueMultiplier;
         }
 
-        public string DefaultChannel { get; private set; }
         public double DefaultWarningThreshold { get; private set; }
         public double DefaultCriticalThreshold { get; private set; }
         public int ObservationThreshold { get; private set; }
