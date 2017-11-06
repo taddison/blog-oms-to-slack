@@ -40,7 +40,7 @@ public class OMSMetricToSlack
 
         var alert = new Alert(data.MetricName, computerName, instanceName, metrics);
 
-        __processor.ProcessAlert(alert);
+        await __processor.ProcessAlert(alert);
         
         return req.CreateResponse(HttpStatusCode.OK);
     }
