@@ -2,6 +2,7 @@
 using OMSToSlack.Models;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace OMSToSlack
 {
@@ -16,7 +17,7 @@ namespace OMSToSlack
             _configHelper = new ConfigHelper(context);
         }
 
-        public async void ProcessAlert(Alert alert)
+        public async Task ProcessAlert(Alert alert)
         {
             var alertConfig = _configHelper.GetAlertConfig(alert);
 
