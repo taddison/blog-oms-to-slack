@@ -28,17 +28,19 @@ public class OMSMetricToSlack
         });
 
         // Server1|E:
-        var computerName = data.SearchResults.Tables[0].Rows[0][1].ToString();
+        var machineName = data.SearchResults.Tables[0].Rows[0][1].ToString();
         string instanceName = null;
 
-        if(computerName.Contains('|'))
+        if(machineName.Contains('|'))
         {
-            var split = computerName.Split('|');
-            computerName = split[0];
+            var split = machineName.Split('|');
+            machineName = split[0];
             instanceName = split[1];
         }
 
-        var alert = new Alert(data.MetricName, computerName, instanceName, metrics);
+        machineName = machineName.Replace(".foo.corp", string.Empty);
+
+        var alert = new Alert(data.MetricName, machineName, instanceName, metrics);
 
         await __processor.ProcessAlert(alert);
         
