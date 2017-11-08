@@ -5,7 +5,7 @@
         public OverrideAlertNotificationConfig(string metricName = null, string machineName = null, string channel = null)
         {
             MetricName = string.IsNullOrWhiteSpace(metricName) ? null : metricName;
-            MachineName = string.IsNullOrWhiteSpace(machineName) ? null : machineName;
+            MachineName = string.IsNullOrWhiteSpace(machineName) ? null : machineName.ToLower();
             Channel = channel;
         }
 

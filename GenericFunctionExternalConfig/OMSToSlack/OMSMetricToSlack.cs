@@ -38,7 +38,7 @@ public class OMSMetricToSlack
             instanceName = split[1];
         }
 
-        machineName = machineName.Replace(".foo.corp", string.Empty);
+        machineName = machineName.Replace(".foo.corp", string.Empty).ToLower();
 
         var alert = new Alert(data.MetricName, machineName, instanceName, metrics);
 

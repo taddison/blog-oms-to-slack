@@ -6,7 +6,7 @@
             , double? criticalThreshold = null, int? minimumViolationsToAlert = null)
         {
             MetricName = metricName;
-            MachineName = machineName;
+            MachineName = machineName.ToLower();
             WarningThreshold = warningThreshold;
             CriticalThreshold = criticalThreshold;
             MinimumViolationsToAlert = minimumViolationsToAlert;
